@@ -1,0 +1,34 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+
+jobs:
+  clubkit:
+    runs-on: ubuntu-latest
+    container: swift:6.1
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+        working-directory: ClubKit
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen generate
+      - name: Build, test and render snapshots
+        run: |
+          sim=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')
+          mkdir -p snapshots
+          TEST_RUNNER_SNAPSHOT_DIR="$PWD/snapshots" xcodebuild test -quiet \
+            -project ClubApp.xcodeproj -scheme ClubApp -destination "id=$sim" CODE_SIGNING_ALLOWED=NO
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snapshots
+          path: snapshots
+          if-no-files-found: ignore

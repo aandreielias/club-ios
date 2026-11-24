@@ -1,0 +1,50 @@
+# XcodeGen: `xcodegen generate` writes ClubApp.xcodeproj (not committed). CI runs it; see SPEC-club-ios.md.
+name: ClubApp
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: de
+packages:
+  ClubKit:
+    path: ClubKit
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CLUB_API_URL: http://localhost:8080
+    CLUB_APP_NAME: Verein
+targets:
+  ClubApp:
+    type: application
+    platform: iOS
+    sources: [App]
+    dependencies:
+      - package: ClubKit
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: $(CLUB_APP_NAME)
+        ClubAPIURL: $(CLUB_API_URL)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: at.clubserver.app
+        TARGETED_DEVICE_FAMILY: "1"
+  ClubAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [AppTests]
+    dependencies:
+      - target: ClubApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: at.clubserver.app.tests
+schemes:
+  ClubApp:
+    build:
+      targets:
+        ClubApp: all
+    test:
+      targets: [ClubAppTests]

@@ -1,0 +1,9 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "Der Server des Vereins ist gerade nicht erreichbar." : {},
+    "Erneut versuchen" : {},
+    "Keine Verbindung" : {}
+  },
+  "version" : "1.0"
+}
