@@ -44,11 +44,12 @@ struct CalendarView: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Picker("Ansicht", selection: $mode) {
-                Image(systemName: "calendar").accessibilityLabel("Monat").tag(Mode.month)
-                Image(systemName: "list.bullet").accessibilityLabel("Liste").tag(Mode.list)
+            // One button that shows the other view, so the month title keeps its room.
+            if mode == .month {
+                Button { mode = .list } label: { Image(systemName: "list.bullet") }.accessibilityLabel("Liste")
+            } else {
+                Button { mode = .month } label: { Image(systemName: "calendar") }.accessibilityLabel("Monat")
             }
-            .pickerStyle(.segmented)
         }
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button { go(-1) } label: { Image(systemName: "chevron.left") }.accessibilityLabel("Voriger Monat")

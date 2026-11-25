@@ -8,7 +8,9 @@ final class AppointmentModel {
     let api: ApiClient
     let me: Me
     let id: String
-    let types: [String: AppointmentType]
+    /// Empty when opened from outside the calendar (a notification): then loaded with the appointment.
+    private(set) var types: [String: AppointmentType]
+    let rides: RidesModel
 
     var appointment: Appointment?
     var attendance: Attendance?
@@ -19,12 +21,16 @@ final class AppointmentModel {
         self.me = me
         self.id = id
         self.types = types
+        rides = RidesModel(api: api, me: me, appointmentId: id)
     }
 
     var type: AppointmentType? { appointment.flatMap { types[$0.type] } }
 
     func load() async {
-        let (api, id) = (api, id)
+        let (api, id, needTypes) = (api, id, types.isEmpty)
+        if needTypes, let all = try? await api.appointmentTypes() {
+            types = Dictionary(all.map { ($0.key, $0) }, uniquingKeysWith: { a, _ in a })
+        }
         do {
             async let appointment = api.appointment(id)
             // Types without answers have no attendance worth showing; a refusal leaves only the facts.

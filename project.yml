@@ -19,7 +19,11 @@ targets:
   ClubApp:
     type: application
     platform: iOS
-    sources: [App]
+    sources:
+      - App
+      # German texts of the server's error codes (scripts/error-texts.mjs); ClubKit's tests check them.
+      - path: ClubKit/Contract/error-texts.json
+        buildPhase: resources
     dependencies:
       - package: ClubKit
     info:

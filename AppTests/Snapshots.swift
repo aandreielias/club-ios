@@ -30,7 +30,7 @@ struct Snapshots {
     }
 
     @Test func more() throws {
-        try snap("more", MoreView(me: .sample, signOut: {}))
+        try snap("more", MoreView(api: .offline, me: .sample, calendar: .club(.sample), signOut: {}))
     }
 
     @Test func calendarMonth() throws {
@@ -41,7 +41,11 @@ struct Snapshots {
         let model = AppointmentModel(api: .offline, me: .sample, id: "a1", types: CalendarModel.sampleTypes)
         model.appointment = decode("""
             {"id":"a1","teamId":"t1","type":"MATCH","title":"Heimspiel gegen Hietzing","description":"Treffpunkt 30 Minuten vorher.",
-             "location":"Sporthalle Hernals","startsAt":"\(at(days: 2, hour: 18))","endsAt":"\(at(days: 2, hour: 20))","cancelled":false}
+             "location":"Sporthalle Hernals","startsAt":"\(at(days: 2, hour: 18))","endsAt":"\(at(days: 2, hour: 20))","cancelled":false,"rides":true}
+            """)
+        model.rides.rides = decode("""
+            [{"id":"r1","driverId":"m2","driverName":"Lena Huber","seats":3,"note":"Abfahrt 17:15 beim Bahnhof",
+              "passengers":[{"memberId":"m3","name":"Mara Klein"}]}]
             """)
         model.attendance = decode("""
             {"yes":2,"no":1,"maybe":0,"open":1,"entries":[
@@ -51,6 +55,37 @@ struct Snapshots {
              {"memberId":"m4","name":"Sophie Wolf","status":null,"absent":false,"unconfirmed":false}]}
             """)
         try snap("appointment", NavigationStack { AppointmentView(model: model) {} })
+    }
+
+    @Test func absences() throws {
+        let model = AbsencesModel(api: .offline, me: .sample, calendar: .club(.sample))
+        model.absences = decode("""
+            [{"id":"x1","memberId":"m1","from":"\(day(3))","to":"\(day(9))","reason":"Urlaub"},
+             {"id":"x2","memberId":"m1","from":"\(day(20))","to":"\(day(20))","reason":null}]
+            """)
+        try snap("absences", NavigationStack { AbsencesView(model: model) })
+    }
+
+    @Test func inbox() throws {
+        let model = InboxModel(api: .offline)
+        model.inbox = decode("""
+            {"unread":1,"items":[
+             {"id":"n1","kind":"APPOINTMENT_CHANGED","title":"Geänderter Termin: Heimspiel gegen Hietzing","body":"Neue Zeit: Sa 18:30",
+              "link":"/appointments/a1","createdAt":"\(at(days: 0, hour: 9))","readAt":null},
+             {"id":"n2","kind":"TASK_ASSIGNED","title":"Neue Aufgabe: Bälle aufpumpen","body":"","link":"/tasks/t1",
+              "createdAt":"\(at(days: -1, hour: 17))","readAt":"\(at(days: -1, hour: 18))"}]}
+            """)
+        try snap("inbox", InboxView(model: model, me: .sample, calendar: .club(.sample)))
+    }
+
+    @Test func notificationPreferences() throws {
+        let model = NotificationPreferencesModel(api: .offline)
+        model.items = decode("""
+            [{"kind":"TASK_ASSIGNED","push":true,"email":false},{"kind":"RIDE","push":true,"email":true},
+             {"kind":"MEETING","push":true,"email":true}]
+            """)
+        model.important = ["MEETING"]
+        try snap("notification-preferences", NavigationStack { NotificationPreferencesView(model: model) })
     }
 
     @Test func loadFailed() throws {
@@ -103,6 +138,12 @@ private func at(days: Int, hour: Int) -> String {
     let cal = Calendar.club(.sample)
     let day = cal.date(byAdding: .day, value: days, to: cal.startOfDay(for: Date()))!
     return cal.date(bySettingHour: hour, minute: 0, second: 0, of: day)!.formatted(.iso8601)
+}
+
+/// A club day `days` from today as `yyyy-MM-dd`.
+private func day(_ days: Int) -> String {
+    let cal = Calendar.club(.sample)
+    return cal.dayText(cal.date(byAdding: .day, value: days, to: Date())!)
 }
 
 private func decode<T: Decodable>(_ json: String) -> T {

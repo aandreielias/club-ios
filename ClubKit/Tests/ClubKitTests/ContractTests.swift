@@ -17,6 +17,16 @@ import Testing
     try check(OpenAnswer.self, "at.clubserver.attendance.api.AttendanceApi.OpenAnswer")
     try check(MyAnswer.self, "at.clubserver.attendance.api.AttendanceApi.MyAnswer")
     try checkBody(AnswerBody(memberId: "m1", status: .no, reason: "krank"), "at.clubserver.gateway.rest.CalendarController.ResponseBody")
+    try check(Absence.self, "at.clubserver.attendance.api.AttendanceApi.AbsenceDto")
+    try checkBody(AbsenceBody(memberId: "m2", from: "2026-12-01", to: "2026-12-03", reason: "Urlaub"), "at.clubserver.gateway.rest.AbsencesController.AbsenceBody")
+    try check(Ride.self, "at.clubserver.attendance.api.AttendanceApi.RideDto")
+    try checkBody(RideBody(seats: 3, note: "17:30 bei der Halle"), "at.clubserver.gateway.rest.CalendarController.RideBody")
+    try checkBody(PassengerBody(memberId: "m2"), "at.clubserver.gateway.rest.CalendarController.PassengerBody")
+    try check(CalendarSettings.self, "at.clubserver.calendar.api.CalendarApi.CalendarSettings")
+    try check(Inbox.self, "at.clubserver.notifications.api.NotificationsApi.NotificationList")
+    try check(PreferenceList.self, "at.clubserver.notifications.api.NotificationsApi.Preferences")
+    try checkBody(PreferenceList(items: [NotificationPreference(kind: "RIDE", push: true, email: false)]), "at.clubserver.notifications.api.NotificationsApi.Preferences")
+    try check(NotificationSettings.self, "at.clubserver.notifications.api.NotificationsApi.NotificationSettings")
 }
 
 /// Request bodies: every key the app sends is a property of the server's schema.

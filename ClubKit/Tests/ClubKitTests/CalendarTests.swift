@@ -42,7 +42,7 @@ private func item(_ json: String) -> CalendarItem {
 private func appointment(team: String?, startsIn hours: Double = 48, cancelled: Bool = false) -> Appointment {
     let json = """
         {"id":"a1","teamId":\(team.map { "\"\($0)\"" } ?? "null"),"type":"MATCH","title":"Spiel","startsAt":"\(now.addingTimeInterval(hours * 3600).formatted(.iso8601))",
-         "endsAt":"\(now.addingTimeInterval((hours + 2) * 3600).formatted(.iso8601))","cancelled":\(cancelled)}
+         "endsAt":"\(now.addingTimeInterval((hours + 2) * 3600).formatted(.iso8601))","cancelled":\(cancelled),"rides":false}
         """
     return try! decoder.decode(Appointment.self, from: Data(json.utf8))
 }

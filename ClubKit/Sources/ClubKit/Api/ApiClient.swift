@@ -32,6 +32,20 @@ public struct ApiClient: Sendable {
         _ = try await send("PATCH", path, body: JSONEncoder().encode(body))
     }
 
+    /// Creates something. `key` is the Idempotency-Key: one per logical POST, sent again when the same POST is retried.
+    public func post<T: Decodable>(_ path: String, _ body: some Encodable, key: String) async throws -> T {
+        try await Self.decoder().decode(T.self, from: send("POST", path, body: JSONEncoder().encode(body), key: key))
+    }
+
+    /// Actions without body or answer that may simply run again (e.g. mark all read).
+    public func post(_ path: String) async throws {
+        _ = try await send("POST", path)
+    }
+
+    public func delete(_ path: String) async throws {
+        _ = try await send("DELETE", path)
+    }
+
     /// Server paths (`/api/v1/...`, also the asset links the server sends) against the API's address.
     public func url(_ path: String) -> URL {
         URL(string: path, relativeTo: baseURL)!.absoluteURL
@@ -55,7 +69,7 @@ public struct ApiClient: Sendable {
         date.formatted(.iso8601)
     }
 
-    private func send(_ method: String, _ path: String, query: [String: String] = [:], body: Data? = nil) async throws -> Data {
+    private func send(_ method: String, _ path: String, query: [String: String] = [:], body: Data? = nil, key: String? = nil) async throws -> Data {
         var components = URLComponents(url: url(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty {
             components.queryItems = query.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) }
@@ -65,6 +79,9 @@ public struct ApiClient: Sendable {
         if let body {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+        if let key {
+            request.setValue(key, forHTTPHeaderField: "Idempotency-Key")
         }
         if let token = try await token() {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

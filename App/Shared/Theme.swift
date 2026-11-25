@@ -107,8 +107,9 @@ extension View {
             .environment(\.locale, Locale(identifier: club.locale))
             .environment(\.timeZone, TimeZone(identifier: club.timeZone) ?? .current)
             .environment(\.calendar, .club(club))
+            // No foregroundStyle(theme.text) here: it would also colour every button and drop the tint.
+            // shortcut: plain text uses the system label colour, the brand text colour only where a view sets it.
             .tint(theme.accent)
-            .foregroundStyle(theme.text)
             .font(theme.font(.body))
             .buttonBorderShape(.roundedRectangle(radius: theme.radius))
     }

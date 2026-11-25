@@ -14,6 +14,8 @@ public struct Appointment: Decodable, Sendable, Identifiable {
     public let endsAt: Date
     public let cancelled: Bool
     public let cancelReason: String?
+    /// Car pools offered.
+    public let rides: Bool
 }
 
 /// A club-defined appointment type with its answer rules (`GET /api/v1/calendar/types`).

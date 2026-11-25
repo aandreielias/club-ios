@@ -23,12 +23,18 @@ struct AppointmentView: View {
                     AnswerForm(model: model, respondents: respondents, answered: answered)
                 }
                 if let attendance = model.attendance, !attendance.entries.isEmpty { people(attendance) }
+                if appointment.rides && !appointment.cancelled {
+                    RidesSection(model: model.rides, open: appointment.startsAt > Date())
+                }
             }
         }
         .brandSurface()
         .overlay { if model.appointment == nil && !model.failed { ProgressView() } }
         .overlay { if model.failed { LoadFailedView { Task { await model.load() } } } }
-        .refreshable { await model.load() }
+        .refreshable {
+            await model.load()
+            if model.appointment?.rides == true { await model.rides.load() }
+        }
         .task { if model.appointment == nil { await model.load() } }
         .navigationTitle(model.type?.label ?? String(localized: "Termin"))
         .navigationBarTitleDisplayMode(.inline)
@@ -91,7 +97,7 @@ private struct AnswerForm: View {
     @State private var answer: Answer?
     @State private var reason = ""
     @State private var busy = false
-    @State private var failed = false
+    @State private var error: String?
     @State private var saved = false
     @Environment(\.theme) private var theme
 
@@ -134,9 +140,8 @@ private struct AnswerForm: View {
         } header: {
             Text("Deine Antwort")
         } footer: {
-            if failed {
-                // shortcut: one text for every error; map ProblemError codes to error-codes.json texts with the first form that needs them.
-                Text("Das Speichern hat nicht geklappt. Bitte versuche es noch einmal.").foregroundStyle(.red)
+            if let error {
+                Text(error).foregroundStyle(.red)
             } else if saved {
                 Text("Antwort gespeichert.")
             } else {
@@ -154,7 +159,7 @@ private struct AnswerForm: View {
         answer = entry?.absent == true ? nil : entry?.status
         reason = entry?.reason ?? ""
         saved = false
-        failed = false
+        error = nil
     }
 
     private func label(_ answer: Answer) -> LocalizedStringKey {
@@ -168,14 +173,14 @@ private struct AnswerForm: View {
     private func submit() {
         guard let answer else { return }
         busy = true
-        failed = false
+        error = nil
         Task {
             do {
                 try await model.answer(memberId, answer, reason: reason)
                 saved = true
                 await answered()
             } catch {
-                failed = true
+                self.error = ErrorTexts.app.text(error)
             }
             busy = false
         }
