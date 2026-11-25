@@ -3,10 +3,12 @@ import SwiftUI
 
 @main
 struct ClubMain: App {
-    @State private var model: AppModel = {
-        let auth = Auth(url: url("ClubSupabaseURL"), publishableKey: setting("ClubSupabaseKey"), storage: KeychainStorage())
-        return AppModel(api: ApiClient(baseURL: url("ClubAPIURL"), token: { try await auth.token() }), auth: auth)
-    }()
+    @State private var model: AppModel
+
+    init() {
+        let auth = Auth(url: Self.url("ClubSupabaseURL"), publishableKey: Self.setting("ClubSupabaseKey"), storage: KeychainStorage())
+        _model = State(initialValue: AppModel(api: ApiClient(baseURL: Self.url("ClubAPIURL"), token: { try await auth.token() }), auth: auth))
+    }
 
     var body: some Scene {
         WindowGroup { RootView(model: model) }
