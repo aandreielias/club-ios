@@ -45,17 +45,10 @@ final class TasksModel {
         error = nil
         do {
             let changed = try await api.setStage(task.id, stage)
-            if let index = list?.items.firstIndex(where: { $0.id == task.id }) { replace(index, changed) }
+            if let index = list?.items.firstIndex(where: { $0.id == task.id }) { list?.items[index] = changed }
         } catch {
             self.error = ErrorTexts.app.text(error)
         }
-    }
-
-    private func replace(_ index: Int, _ task: ClubTask) {
-        guard let old = list else { return }
-        var items = old.items
-        items[index] = task
-        list = TaskList(items: items, truncated: old.truncated)
     }
 }
 

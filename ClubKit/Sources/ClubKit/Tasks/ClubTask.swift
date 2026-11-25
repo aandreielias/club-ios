@@ -58,7 +58,7 @@ public struct ClubTask: Decodable, Sendable, Identifiable {
 
 /// `GET /tasks`: at most 1000, `truncated` when cut.
 public struct TaskList: Decodable, Sendable {
-    public let items: [ClubTask]
+    public var items: [ClubTask]
     public let truncated: Bool
 }
 
