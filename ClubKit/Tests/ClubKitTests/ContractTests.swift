@@ -8,6 +8,16 @@ import Testing
 /// New model → add a line.
 @Test func modelsMatchServer() throws {
     try check(Club.self, "at.clubserver.platform.club.ClubSettings.Club")
+    try check(Me.self, "at.clubserver.gateway.rest.MembersController.Me")
+    try checkBody(ProfileBody(birthDate: "2010-05-01"), "at.clubserver.gateway.rest.MembersController.ProfileBody")
+}
+
+/// Request bodies: every key the app sends is a property of the server's schema.
+private func checkBody(_ body: some Encodable, _ schema: String) throws {
+    let schemas = (try loadSpec()["components"] as! [String: Any])["schemas"] as! [String: Any]
+    let properties = try #require((schemas[schema] as? [String: Any])?["properties"] as? [String: Any], "unknown schema \(schema)")
+    let sent = try JSONSerialization.jsonObject(with: JSONEncoder().encode(body)) as! [String: Any]
+    #expect(Set(sent.keys).isSubset(of: properties.keys), "\(schema) lacks \(Set(sent.keys).subtracting(properties.keys))")
 }
 
 private func check<T: Decodable>(_: T.Type, _ schema: String) throws {

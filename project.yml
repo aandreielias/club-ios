@@ -11,6 +11,9 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     CLUB_API_URL: http://localhost:8080
+    # Supabase project of the club (DEPLOY.md Part 16.4); the publishable key is public by design.
+    CLUB_SUPABASE_URL: http://localhost:54321
+    CLUB_SUPABASE_KEY: ""
     CLUB_APP_NAME: Verein
 targets:
   ClubApp:
@@ -24,6 +27,9 @@ targets:
       properties:
         CFBundleDisplayName: $(CLUB_APP_NAME)
         ClubAPIURL: $(CLUB_API_URL)
+        ClubSupabaseURL: $(CLUB_SUPABASE_URL)
+        ClubSupabaseKey: $(CLUB_SUPABASE_KEY)
+        NSFaceIDUsageDescription: Damit du die App mit Face ID entsperren kannst.
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSAppTransportSecurity:

@@ -8,10 +8,10 @@ import Testing
 private let base = URL(string: "https://api.example.club")!
 
 private func client(status: Int, body: String, seen: @escaping @Sendable (URLRequest) -> Void = { _ in }) -> ApiClient {
-    ApiClient(baseURL: base) { request in
+    ApiClient(baseURL: base, transport: { request in
         seen(request)
         return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!)
-    }
+    })
 }
 
 @Test func decodesClub() async throws {
@@ -33,6 +33,24 @@ private func client(status: Int, body: String, seen: @escaping @Sendable (URLReq
     #expect(problem.code == "meeting.not-found")
     #expect(problem.correlationId == "c1")
     #expect(ProblemError(status: 502, body: Data("<html>".utf8)).code == nil)
+}
+
+@Test func sendsTokenAndBody() async throws {
+    let seen = Seen()
+    let api = ApiClient(baseURL: base, token: { "t1" }) { request in
+        seen.request = request
+        return (Data("{}".utf8), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    }
+    try await api.updateProfile(of: "m1", ProfileBody(birthDate: "2010-05-01"))
+    let request = try #require(seen.request)
+    #expect(request.httpMethod == "PATCH")
+    #expect(request.url?.path == "/api/v1/members/m1")
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer t1")
+    #expect(request.httpBody == Data(#"{"birthDate":"2010-05-01"}"#.utf8))
+}
+
+private final class Seen: @unchecked Sendable {
+    var request: URLRequest?
 }
 
 @Test func resolvesServerPaths() {

@@ -1,9 +1,30 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Abbrechen" : {},
+    "Abmelden" : {},
+    "Anmelden" : {},
+    "Anmeldung entsperren" : {},
+    "Das Speichern hat nicht geklappt. Bitte versuche es noch einmal." : {},
     "Der Server des Vereins ist gerade nicht erreichbar." : {},
+    "Die Anmeldung hat nicht geklappt. Bitte versuche es noch einmal." : {},
+    "E-Mail" : {},
+    "E-Mail oder Passwort ist falsch." : {},
+    "Entsperren" : {},
     "Erneut versuchen" : {},
-    "Keine Verbindung" : {}
+    "Fertig" : {},
+    "Geburtsdatum" : {},
+    "Hallo, %@" : {},
+    "Keine Verbindung" : {},
+    "Link senden" : {},
+    "Passwort" : {},
+    "Passwort vergessen" : {},
+    "Passwort vergessen?" : {},
+    "Weiter" : {},
+    "Wenn es zu dieser Adresse ein Konto gibt, kommt gleich eine E-Mail mit einem Link." : {},
+    "Willkommen, %@" : {},
+    "Wird für Altersklassen und Einverständnisse gebraucht. Sichtbar nur für dich, deine Erziehungsberechtigten, deine Trainer:innen und Admins." : {},
+    "Zu viele Versuche. Bitte warte kurz." : {}
   },
   "version" : "1.0"
 }

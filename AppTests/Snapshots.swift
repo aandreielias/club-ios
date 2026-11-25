@@ -9,12 +9,28 @@ import UIKit
 @MainActor
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["SNAPSHOT_DIR"] != nil))
 struct Snapshots {
+    @Test func login() throws {
+        try snap("login", LoginView(club: .sample, logoURL: nil, signIn: { _, _ in }, resetPassword: { _ in }))
+    }
+
+    @Test func forgotPassword() throws {
+        try snap("forgot-password", ForgotPasswordView(email: "anna@example.at") { _ in })
+    }
+
+    @Test func locked() throws {
+        try snap("locked", LockedView(club: .sample, logoURL: nil, unlock: {}, signOut: {}))
+    }
+
+    @Test func onboarding() throws {
+        try snap("onboarding", OnboardingView(me: .sample, save: { _ in }, signOut: {}))
+    }
+
     @Test func start() throws {
-        try snap("start", StartView(club: .sample, logoURL: nil).tint(Color(Club.sample.brand.primary)))
+        try snap("start", StartView(club: .sample, logoURL: nil, me: .sample, signOut: {}))
     }
 
     @Test func loadFailed() throws {
-        try snap("load-failed", LoadFailedView {}.tint(Color(Club.sample.brand.primary)))
+        try snap("load-failed", LoadFailedView {})
     }
 
     private func snap(_ name: String, _ view: some View) throws {
@@ -24,7 +40,7 @@ struct Snapshots {
             let window = UIWindow(windowScene: scene)
             window.frame = scene.screen.bounds
             window.overrideUserInterfaceStyle = style
-            window.rootViewController = UIHostingController(rootView: view)
+            window.rootViewController = UIHostingController(rootView: view.tint(Color(Club.sample.brand.primary)))
             window.isHidden = false
             window.layoutIfNeeded()
             let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
@@ -39,5 +55,11 @@ struct Snapshots {
 extension Club {
     static let sample: Club = try! JSONDecoder().decode(Club.self, from: Data("""
         {"name":"SDG Vienna","brand":{"primary":"#5E6AD2","headingCaps":true},"assets":{"logo":null}}
+        """.utf8))
+}
+
+extension Me {
+    static let sample: Me = try! JSONDecoder().decode(Me.self, from: Data("""
+        {"member":{"id":"m1","firstName":"Anna"},"missing":["birthDate"]}
         """.utf8))
 }

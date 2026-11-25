@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     container: swift:6.1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: swift test
         working-directory: ClubKit
 
   ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: brew install xcodegen
       - run: xcodegen generate
       - name: Build, test and render snapshots
@@ -26,7 +26,7 @@ jobs:
           mkdir -p snapshots
           TEST_RUNNER_SNAPSHOT_DIR="$PWD/snapshots" xcodebuild test -quiet \
             -project ClubApp.xcodeproj -scheme ClubApp -destination "id=$sim" CODE_SIGNING_ALLOWED=NO
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: snapshots
