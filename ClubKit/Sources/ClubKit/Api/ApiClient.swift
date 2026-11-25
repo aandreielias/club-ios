@@ -27,6 +27,11 @@ public struct ApiClient: Sendable {
         _ = try await send("PUT", path, body: JSONEncoder().encode(body))
     }
 
+    /// Writes that answer with the changed record.
+    public func put<T: Decodable>(_ path: String, _ body: some Encodable) async throws -> T {
+        try await Self.decoder().decode(T.self, from: send("PUT", path, body: JSONEncoder().encode(body)))
+    }
+
     /// Writes whose answer the app does not read.
     public func patch(_ path: String, _ body: some Encodable) async throws {
         _ = try await send("PATCH", path, body: JSONEncoder().encode(body))

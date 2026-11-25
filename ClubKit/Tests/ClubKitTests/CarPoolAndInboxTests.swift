@@ -6,7 +6,7 @@ import Testing
 @testable import ClubKit
 
 private let me = try! JSONDecoder().decode(Me.self, from: Data("""
-    {"member":{"id":"m1","firstName":"Anna"},"missing":[],"teams":[],"wardIds":["k2","k1"],"wardNames":{"k1":"Ben","k2":"Clara"}}
+    {"member":{"id":"m1","firstName":"Anna","roles":[]},"missing":[],"teams":[],"wardIds":["k2","k1"],"wardNames":{"k1":"Ben","k2":"Clara"}}
     """.utf8))
 
 private func ride(driver: String, seats: Int = 3, passengers: [String] = []) -> Ride {
@@ -44,9 +44,10 @@ private func ride(driver: String, seats: Int = 3, passengers: [String] = []) -> 
         {"unread":1,"items":[
          {"id":"n1","kind":"APPOINTMENT_CHANGED","title":"t","body":"b","link":"/appointments/a1","createdAt":"2026-11-25T10:00:00Z","readAt":null},
          {"id":"n2","kind":"MAIL","title":"t","body":"b","link":"/mail/x/y","createdAt":"2026-11-25T10:00:00.5Z","readAt":"2026-11-25T11:00:00Z"},
+         {"id":"n4","kind":"TASK_ASSIGNED","title":"t","body":"b","link":"/tasks/t1","createdAt":"2026-11-25T10:00:00Z","readAt":null},
          {"id":"n3","kind":"FEE","title":"t","body":"b","link":null,"createdAt":"2026-11-25T10:00:00Z","readAt":null}]}
         """.utf8))
-    #expect(inbox.items.map(\.target) == [.appointment("a1"), nil, nil])
+    #expect(inbox.items.map(\.target) == [.appointment("a1"), nil, .task("t1"), nil])
 }
 
 @Test func createsSendTheIdempotencyKey() async throws {

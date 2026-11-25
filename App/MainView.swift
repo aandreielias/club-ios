@@ -25,6 +25,8 @@ struct MainView: View {
                 .tabItem { Label("Start", systemImage: "house") }
             CalendarView(model: CalendarModel(api: api, me: me, calendar: .club(club)))
                 .tabItem { Label("Kalender", systemImage: "calendar") }
+            TasksView(model: TasksModel(api: api, me: me))
+                .tabItem { Label("Aufgaben", systemImage: "checklist") }
             InboxView(model: inbox, me: me, calendar: .club(club))
                 .tabItem { Label("Mitteilungen", systemImage: "bell") }
                 .badge(inbox.unread)

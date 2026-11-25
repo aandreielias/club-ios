@@ -30,7 +30,7 @@ struct CalendarView: View {
             .overlay { if model.failed { LoadFailedView { Task { await model.load() } } } }
             .refreshable { await model.load() }
             .task { if model.items == nil { await model.load() } }
-            .navigationTitle(model.month.start.formatted(.dateTime.month(.wide).year().club(model.calendar)))
+            .navigationTitle(model.month.start.formatted(.dateTime.month(.abbreviated).year().club(model.calendar)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
             .navigationDestination(for: AppointmentLink.self) { link in
@@ -127,9 +127,13 @@ private struct ItemRow: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        // shortcut: only appointments open; tasks, meetings, tournaments, absences and birthdays follow with their areas.
+        // shortcut: appointments and tasks open; meetings, tournaments, absences and birthdays follow with their areas.
         if item.kind == "appointment" {
             NavigationLink(value: AppointmentLink(id: item.id)) { row }
+        } else if item.kind == "task" {
+            NavigationLink {
+                TaskView(model: TaskModel(api: model.api, me: model.me, id: item.id, catalog: TaskCatalog(api: model.api))) {}
+            } label: { row }
         } else {
             row
         }

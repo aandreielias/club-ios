@@ -57,6 +57,8 @@ struct InboxView: View {
                 switch target {
                 case .appointment(let id):
                     AppointmentView(model: AppointmentModel(api: model.api, me: me, id: id, types: [:])) {}
+                case .task(let id):
+                    TaskView(model: TaskModel(api: model.api, me: me, id: id, catalog: TaskCatalog(api: model.api))) {}
                 }
             }
         }

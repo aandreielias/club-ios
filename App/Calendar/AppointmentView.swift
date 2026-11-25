@@ -82,7 +82,8 @@ struct AppointmentView: View {
                 .accessibilityElement(children: .combine)
             }
         } header: {
-            Text("\(attendance.yes) Zusagen · \(attendance.maybe) Vielleicht · \(attendance.no) Absagen · \(attendance.open) offen")
+            // Label before number: German needs no plural forms that way.
+            Text("Zugesagt \(attendance.yes) · Vielleicht \(attendance.maybe) · Abgesagt \(attendance.no) · Offen \(attendance.open)")
         }
     }
 }

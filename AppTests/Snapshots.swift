@@ -57,6 +57,18 @@ struct Snapshots {
         try snap("appointment", NavigationStack { AppointmentView(model: model) {} })
     }
 
+    /// The car pools sit below the fold of `appointment`, so they get a screen of their own.
+    @Test func rides() throws {
+        let model = RidesModel(api: .offline, me: .sample, appointmentId: "a1")
+        model.rides = decode("""
+            [{"id":"r1","driverId":"m2","driverName":"Lena Huber","seats":3,"note":"Abfahrt 17:15 beim Bahnhof",
+              "passengers":[{"memberId":"m3","name":"Mara Klein"}]},
+             {"id":"r2","driverId":"m4","driverName":"Sophie Wolf","seats":1,"note":null,
+              "passengers":[{"memberId":"m1","name":"Anna Berger"}]}]
+            """)
+        try snap("rides", NavigationStack { List { RidesSection(model: model, open: true) }.brandSurface().navigationTitle("Spiel") })
+    }
+
     @Test func absences() throws {
         let model = AbsencesModel(api: .offline, me: .sample, calendar: .club(.sample))
         model.absences = decode("""
@@ -86,6 +98,25 @@ struct Snapshots {
             """)
         model.important = ["MEETING"]
         try snap("notification-preferences", NavigationStack { NotificationPreferencesView(model: model) })
+    }
+
+    @Test func tasks() throws {
+        try snap("tasks", TasksView(model: .sample(board: false)))
+    }
+
+    @Test func tasksBoard() throws {
+        try snap("tasks-board", TasksView(model: .sample(board: true)))
+    }
+
+    @Test func task() throws {
+        let tasks = TasksModel.sample(board: false)
+        let model = TaskModel(api: .offline, me: .sample, id: "t1", catalog: tasks.catalog)
+        model.task = decode(sampleTask(id: "t1", title: "Bälle aufpumpen", stage: "S_WORK", due: at(days: -1, hour: 17), assignees: ["m1", "m2"],
+                                      extra: #""checklist":[{"id":"c1","text":"Pumpe holen","done":true},{"id":"c2","text":"Alle Bälle prüfen","done":false}],"comments":[{"id":"k1","authorId":"m2","text":"Pumpe liegt im Kasten.","createdAt":"\#(at(days: 0, hour: 8))"}],"subtasks":[{"id":"t9","title":"Ventilnadeln kaufen","status":"DONE"}]"#))
+        model.links = decode("""
+            {"needs":[{"itemId":"i1","name":"Ballpumpe","quantity":1,"deleted":false}],"files":[{"id":"f1","name":"Ballpflege.pdf","deleted":false}]}
+            """)
+        try snap("task", NavigationStack { TaskView(model: model) {} })
     }
 
     @Test func loadFailed() throws {
@@ -123,7 +154,7 @@ extension Club {
 
 extension Me {
     static let sample: Me = try! JSONDecoder().decode(Me.self, from: Data("""
-        {"member":{"id":"m1","firstName":"Anna"},"missing":["birthDate"],"teams":[{"id":"t1","name":"Damen 1"}],
+        {"member":{"id":"m1","firstName":"Anna","roles":[]},"missing":["birthDate"],"teams":[{"id":"t1","name":"Damen 1"}],
          "wardIds":[],"wardNames":{}}
         """.utf8))
 }
@@ -138,6 +169,38 @@ private func at(days: Int, hour: Int) -> String {
     let cal = Calendar.club(.sample)
     let day = cal.date(byAdding: .day, value: days, to: cal.startOfDay(for: Date()))!
     return cal.date(bySettingHour: hour, minute: 0, second: 0, of: day)!.formatted(.iso8601)
+}
+
+extension TasksModel {
+    @MainActor static func sample(board: Bool) -> TasksModel {
+        let model = TasksModel(api: .offline, me: .sample)
+        model.board = board
+        model.catalog.stages = decode("""
+            [{"key":"S_OPEN","label":"Offen","hue":"red","phase":"OPEN","sort":0,"archived":false},
+             {"key":"S_WORK","label":"In Arbeit","hue":"yellow","phase":"IN_PROGRESS","sort":1,"archived":false},
+             {"key":"S_DONE","label":"Erledigt","hue":"green","phase":"DONE","sort":2,"archived":false}]
+            """)
+        model.catalog.names = ["m1": "Anna Berger", "m2": "Lena Huber", "m3": "Mara Klein"]
+        model.list = decode("""
+            {"truncated":false,"items":[
+             \(sampleTask(id: "t1", title: "Bälle aufpumpen", stage: "S_WORK", due: at(days: -1, hour: 17), assignees: ["m1", "m2"],
+                         extra: #""checklist":[{"id":"c1","text":"Pumpe holen","done":true},{"id":"c2","text":"Alle Bälle prüfen","done":false}],"comments":[],"subtasks":[]"#)),
+             \(sampleTask(id: "t2", title: "Trikots waschen", stage: "S_OPEN", due: at(days: 3, hour: 12), assignees: ["m1"], priority: "HIGH")),
+             \(sampleTask(id: "t3", title: "Hallenplan an Eltern schicken", stage: "S_OPEN", due: nil, assignees: ["m3"])),
+             \(sampleTask(id: "t4", title: "Netz flicken", stage: "S_DONE", due: at(days: -4, hour: 18), assignees: ["m1"], status: "DONE"))]}
+            """)
+        return model
+    }
+}
+
+private func sampleTask(id: String, title: String, stage: String, due: String?, assignees: [String], status: String = "OPEN",
+                        priority: String = "NORMAL", extra: String = #""checklist":[],"comments":[],"subtasks":[]"#) -> String {
+    """
+    {"id":"\(id)","teamId":null,"title":"\(title)","description":"Vor dem Heimspiel am Samstag.","status":"\(status)","stage":"\(stage)",
+     "dueAt":\(due.map { "\"\($0)\"" } ?? "null"),"createdBy":"m2","assignees":[\(assignees.map { "\"\($0)\"" }.joined(separator: ","))],
+     "createdAt":"\(at(days: -6, hour: 10))","completedAt":null,"repeatWeeks":null,"repeatMonths":null,"repeatByWeekday":false,
+     "priority":"\(priority)","labels":[],"parent":null,"blockedBy":[],\(extra)}
+    """
 }
 
 /// A club day `days` from today as `yyyy-MM-dd`.

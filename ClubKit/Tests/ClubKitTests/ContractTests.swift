@@ -27,6 +27,15 @@ import Testing
     try check(PreferenceList.self, "at.clubserver.notifications.api.NotificationsApi.Preferences")
     try checkBody(PreferenceList(items: [NotificationPreference(kind: "RIDE", push: true, email: false)]), "at.clubserver.notifications.api.NotificationsApi.Preferences")
     try check(NotificationSettings.self, "at.clubserver.notifications.api.NotificationsApi.NotificationSettings")
+    try check(TaskList.self, "at.clubserver.tasks.api.TasksApi.TaskList")
+    try check(ClubTask.self, "at.clubserver.tasks.api.TasksApi.TaskDto")
+    try check(Items<TaskStage>.self, "at.clubserver.tasks.api.TasksApi.StageList")
+    try check(Items<TaskLabel>.self, "at.clubserver.tasks.api.TasksApi.LabelList")
+    try check(RecordLinks.self, "at.clubserver.platform.Links")
+    try check(MemberNames.self, "at.clubserver.members.api.MembersApi.MemberNames")
+    try checkBody(StatusBody(status: nil, stage: "STAGE_X"), "at.clubserver.gateway.rest.TasksController.StatusBody")
+    try checkBody(CheckBody(done: true), "at.clubserver.gateway.rest.TasksController.CheckBody")
+    try checkBody(CommentBody(text: "Erledigt"), "at.clubserver.gateway.rest.TasksController.CommentBody")
 }
 
 /// Request bodies: every key the app sends is a property of the server's schema.

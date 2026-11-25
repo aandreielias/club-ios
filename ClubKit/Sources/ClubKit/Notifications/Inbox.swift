@@ -22,6 +22,7 @@ public struct Inbox: Decodable, Sendable {
             guard parts.count == 2 else { return nil }
             switch parts[0] {
             case "appointments": return .appointment(parts[1])
+            case "tasks": return .task(parts[1])
             default: return nil
             }
         }
@@ -29,6 +30,7 @@ public struct Inbox: Decodable, Sendable {
 
     public enum Target: Hashable, Sendable {
         case appointment(String)
+        case task(String)
     }
 }
 

@@ -11,6 +11,8 @@ public struct Me: Decodable, Sendable {
     public struct Member: Decodable, Sendable {
         public let id: String
         public let firstName: String
+        /// ADMIN, BOARD, COACH, … (only to hide what the server would refuse).
+        public let roles: [String]
     }
 
     public struct Team: Decodable, Sendable {

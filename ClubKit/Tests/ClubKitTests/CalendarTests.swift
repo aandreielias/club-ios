@@ -50,7 +50,7 @@ private func appointment(team: String?, startsIn hours: Double = 48, cancelled: 
 private let now = Date(timeIntervalSince1970: 1_800_000_000)
 
 private let me = try! JSONDecoder().decode(Me.self, from: Data("""
-    {"member":{"id":"m1","firstName":"Anna"},"missing":[],"teams":[{"id":"t1","name":"Damen 1"}],
+    {"member":{"id":"m1","firstName":"Anna","roles":[]},"missing":[],"teams":[{"id":"t1","name":"Damen 1"}],
      "wardIds":["k2","k1"],"wardNames":{"k1":"Ben","k2":"Clara"}}
     """.utf8))
 
