@@ -26,7 +26,31 @@ struct Snapshots {
     }
 
     @Test func start() throws {
-        try snap("start", StartView(club: .sample, logoURL: nil, me: .sample, signOut: {}))
+        try snap("start", StartView(club: .sample, logoURL: nil, me: .sample))
+    }
+
+    @Test func more() throws {
+        try snap("more", MoreView(me: .sample, signOut: {}))
+    }
+
+    @Test func calendarMonth() throws {
+        try snap("calendar-month", CalendarView(model: .sample))
+    }
+
+    @Test func appointment() throws {
+        let model = AppointmentModel(api: .offline, me: .sample, id: "a1", types: CalendarModel.sampleTypes)
+        model.appointment = decode("""
+            {"id":"a1","teamId":"t1","type":"MATCH","title":"Heimspiel gegen Hietzing","description":"Treffpunkt 30 Minuten vorher.",
+             "location":"Sporthalle Hernals","startsAt":"\(at(days: 2, hour: 18))","endsAt":"\(at(days: 2, hour: 20))","cancelled":false}
+            """)
+        model.attendance = decode("""
+            {"yes":2,"no":1,"maybe":0,"open":1,"entries":[
+             {"memberId":"m1","name":"Anna Berger","status":"YES","absent":false,"unconfirmed":true},
+             {"memberId":"m2","name":"Lena Huber","status":"YES","absent":false,"unconfirmed":false},
+             {"memberId":"m3","name":"Mara Klein","status":"NO","reason":"Krank","absent":false,"unconfirmed":false},
+             {"memberId":"m4","name":"Sophie Wolf","status":null,"absent":false,"unconfirmed":false}]}
+            """)
+        try snap("appointment", NavigationStack { AppointmentView(model: model) {} })
     }
 
     @Test func loadFailed() throws {
@@ -40,7 +64,7 @@ struct Snapshots {
             let window = UIWindow(windowScene: scene)
             window.frame = scene.screen.bounds
             window.overrideUserInterfaceStyle = style
-            window.rootViewController = UIHostingController(rootView: view.tint(Color(Club.sample.brand.primary)))
+            window.rootViewController = UIHostingController(rootView: view.clubStyle(.sample))
             window.isHidden = false
             window.layoutIfNeeded()
             let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
@@ -52,14 +76,63 @@ struct Snapshots {
     }
 }
 
+/// The SDG brand guide as the club enters it in Erscheinungsbild (test data; the app reads the brand from the server).
 extension Club {
     static let sample: Club = try! JSONDecoder().decode(Club.self, from: Data("""
-        {"name":"SDG Vienna","brand":{"primary":"#5E6AD2","headingCaps":true},"assets":{"logo":null}}
+        {"name":"SDG Vienna","timeZone":"Europe/Vienna","locale":"de-AT","assets":{"logo":null},
+         "brand":{"primary":"#57263C","primaryHover":"#431C2E","accent":"#A8862F","text":"#1E1A1D","textMuted":"#6B5F66",
+                  "tint":"#F5F0F2","line":"#E4DDE1","headingFont":"ANTON","textFont":"INTER","headingCaps":true,
+                  "radiusSmall":4,"radiusLarge":8}}
         """.utf8))
 }
 
 extension Me {
     static let sample: Me = try! JSONDecoder().decode(Me.self, from: Data("""
-        {"member":{"id":"m1","firstName":"Anna"},"missing":["birthDate"]}
+        {"member":{"id":"m1","firstName":"Anna"},"missing":["birthDate"],"teams":[{"id":"t1","name":"Damen 1"}],
+         "wardIds":[],"wardNames":{}}
         """.utf8))
+}
+
+extension ApiClient {
+    /// Never reached: the snapshots set their data before the views load.
+    static let offline = ApiClient(baseURL: URL(string: "http://localhost:9")!)
+}
+
+/// Days from today at a club-local hour, as the server sends instants.
+private func at(days: Int, hour: Int) -> String {
+    let cal = Calendar.club(.sample)
+    let day = cal.date(byAdding: .day, value: days, to: cal.startOfDay(for: Date()))!
+    return cal.date(bySettingHour: hour, minute: 0, second: 0, of: day)!.formatted(.iso8601)
+}
+
+private func decode<T: Decodable>(_ json: String) -> T {
+    try! ApiClient.decoder().decode(T.self, from: Data(json.utf8))
+}
+
+extension CalendarModel {
+    static let sampleTypes: [String: AppointmentType] = Dictionary(uniqueKeysWithValues: [
+        ("TRAINING", "Training", "blue"), ("MATCH", "Spiel", "red"),
+    ].map { key, label, hue -> (String, AppointmentType) in
+        let type: AppointmentType = decode("""
+            {"key":"\(key)","label":"\(label)","hue":"\(hue)","answerDeadlineHours":0,"allowMaybe":true,"reasonOnNo":true,"expectAnswers":"TEAM"}
+            """)
+        return (key, type)
+    })
+
+    @MainActor static var sample: CalendarModel {
+        let model = CalendarModel(api: .offline, me: .sample, calendar: .club(.sample))
+        model.types = sampleTypes
+        model.items = decode("""
+            [{"kind":"appointment","id":"a0","title":"Training Damen 1","start":"\(at(days: 0, hour: 19))","end":"\(at(days: 0, hour: 21))","allDay":false,"category":"APPOINTMENT","detail":"TRAINING","inactive":false},
+             {"kind":"task","id":"t1","title":"Bälle aufpumpen","start":"\(at(days: 0, hour: 17))","end":null,"allDay":false,"category":"TASK","inactive":false},
+             {"kind":"appointment","id":"a1","title":"Heimspiel gegen Hietzing","start":"\(at(days: 2, hour: 18))","end":"\(at(days: 2, hour: 20))","allDay":false,"category":"APPOINTMENT","detail":"MATCH","inactive":false},
+             {"kind":"meeting","id":"mt","title":"Vorstandssitzung","start":"\(at(days: 3, hour: 19))","end":"\(at(days: 3, hour: 21))","allDay":false,"category":"MEETING","inactive":false},
+             {"kind":"holiday","id":"h","title":"Feiertag","start":"\(at(days: 5, hour: 0))","end":"\(at(days: 6, hour: 0))","allDay":true,"category":"HOLIDAY","inactive":false}]
+            """)
+        model.marks = ["a0": .yes]
+        model.openAnswers = decode("""
+            [{"appointmentId":"a1","title":"Heimspiel gegen Hietzing","startsAt":"\(at(days: 2, hour: 18))","memberId":"m1","name":"Anna Berger"}]
+            """)
+        return model
+    }
 }

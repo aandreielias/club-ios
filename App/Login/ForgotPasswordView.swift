@@ -31,6 +31,7 @@ struct ForgotPasswordView: View {
                     .disabled(busy || email.isEmpty)
                 }
             }
+            .brandSurface()
             .navigationTitle("Passwort vergessen")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

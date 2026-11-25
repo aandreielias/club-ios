@@ -14,7 +14,7 @@ struct RootView: View {
                 LoadFailedView { Task { await model.load() } }
             default:
                 if let club = model.club {
-                    signedIn(club).tint(Color(club.brand.primary))
+                    signedIn(club).clubStyle(club)
                 }
             }
         }
@@ -34,7 +34,7 @@ struct RootView: View {
         case .onboarding(let me):
             OnboardingView(me: me, save: { try await model.saveBirthDate($0, of: me) }, signOut: signOut)
         case .ready(let me):
-            StartView(club: club, logoURL: logoURL, me: me, signOut: signOut)
+            MainView(club: club, logoURL: logoURL, me: me, api: model.api, signOut: signOut)
         case .loading, .failed:
             EmptyView()
         }

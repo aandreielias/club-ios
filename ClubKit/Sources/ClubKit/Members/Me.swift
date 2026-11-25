@@ -3,10 +3,19 @@ public struct Me: Decodable, Sendable {
     public let member: Member
     /// Profile fields the app must ask for before anything else works (today `birthDate`).
     public let missing: [String]
+    public let teams: [Team]
+    /// Minors the member acts for, with their names.
+    public let wardIds: [String]
+    public let wardNames: [String: String]
 
     public struct Member: Decodable, Sendable {
         public let id: String
         public let firstName: String
+    }
+
+    public struct Team: Decodable, Sendable {
+        public let id: String
+        public let name: String
     }
 }
 

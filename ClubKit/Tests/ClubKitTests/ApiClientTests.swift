@@ -15,12 +15,10 @@ private func client(status: Int, body: String, seen: @escaping @Sendable (URLReq
 }
 
 @Test func decodesClub() async throws {
-    let json = """
-        {"name":"SDG Vienna","brand":{"primary":"#5E6AD2","headingCaps":true},"assets":{"logo":null}}
-        """
-    let club = try await client(status: 200, body: json) { #expect($0.url?.absoluteString == "https://api.example.club/api/v1/club") }.club()
+    let club = try await client(status: 200, body: sdgClub) { #expect($0.url?.absoluteString == "https://api.example.club/api/v1/club") }.club()
     #expect(club.name == "SDG Vienna")
-    #expect(club.brand.primary == RGB(hex: "#5E6AD2"))
+    #expect(club.brand.primary == RGB(hex: "#57263C"))
+    #expect(club.brand.headingFont == .anton)
     #expect(club.assets.logo == nil)
 }
 

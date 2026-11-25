@@ -1,22 +1,19 @@
 import ClubKit
 import SwiftUI
 
-/// Signed in. Placeholder until the start page sections come.
+/// The start tab. Placeholder until the start page sections come.
 struct StartView: View {
     let club: Club
     let logoURL: URL?
     let me: Me
-    let signOut: () -> Void
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
                 ClubHeader(club: club, logoURL: logoURL)
                 Text("Hallo, \(me.member.firstName)")
-                    .font(.title2)
-            }
-            .toolbar {
-                Button("Abmelden", action: signOut)
+                    .font(theme.font(.title2, weight: .semibold))
             }
         }
     }

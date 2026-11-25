@@ -17,11 +17,8 @@ struct ClubHeader: View {
             .frame(width: 120, height: 120)
             .accessibilityHidden(true)
 
-            // shortcut: brand primary as is, also in dark mode; port club-client's lib/theme/contrast.ts when a dark brand colour reads poorly.
             Text(club.name)
-                .font(.largeTitle.bold())
-                .textCase(club.brand.headingCaps ? .uppercase : nil)
-                .foregroundStyle(.tint)
+                .heading(.largeTitle)
                 .multilineTextAlignment(.center)
         }
         .padding()

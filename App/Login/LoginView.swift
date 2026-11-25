@@ -42,6 +42,7 @@ struct LoginView: View {
                 Button("Passwort vergessen?") { forgot = true }
             }
         }
+        .brandSurface()
         .sheet(isPresented: $forgot) {
             ForgotPasswordView(email: email, send: resetPassword)
         }

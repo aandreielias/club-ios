@@ -34,6 +34,7 @@ struct OnboardingView: View {
                 }
                 .disabled(busy || !picked)
             }
+            .brandSurface()
             .navigationTitle("Geburtsdatum")
             .toolbar {
                 Button("Abmelden", action: signOut)

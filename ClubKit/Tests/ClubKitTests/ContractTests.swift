@@ -10,6 +10,13 @@ import Testing
     try check(Club.self, "at.clubserver.platform.club.ClubSettings.Club")
     try check(Me.self, "at.clubserver.gateway.rest.MembersController.Me")
     try checkBody(ProfileBody(birthDate: "2010-05-01"), "at.clubserver.gateway.rest.MembersController.ProfileBody")
+    try check(CalendarItem.self, "at.clubserver.platform.CalendarItems.CalendarItem")
+    try check(Appointment.self, "at.clubserver.calendar.api.CalendarApi.AppointmentDto")
+    try check(AppointmentType.self, "at.clubserver.calendar.api.CalendarApi.AppointmentTypeDto")
+    try check(Attendance.self, "at.clubserver.attendance.api.AttendanceApi.Attendance")
+    try check(OpenAnswer.self, "at.clubserver.attendance.api.AttendanceApi.OpenAnswer")
+    try check(MyAnswer.self, "at.clubserver.attendance.api.AttendanceApi.MyAnswer")
+    try checkBody(AnswerBody(memberId: "m1", status: .no, reason: "krank"), "at.clubserver.gateway.rest.CalendarController.ResponseBody")
 }
 
 /// Request bodies: every key the app sends is a property of the server's schema.
@@ -22,7 +29,7 @@ private func checkBody(_ body: some Encodable, _ schema: String) throws {
 
 private func check<T: Decodable>(_: T.Type, _ schema: String) throws {
     let sample = try Sample(spec: loadSpec()).json(ref: "#/components/schemas/\(schema)")
-    _ = try JSONDecoder().decode(T.self, from: JSONSerialization.data(withJSONObject: sample))
+    _ = try ApiClient.decoder().decode(T.self, from: JSONSerialization.data(withJSONObject: sample))
 }
 
 private func loadSpec() throws -> [String: Any] {

@@ -29,6 +29,8 @@ targets:
         ClubAPIURL: $(CLUB_API_URL)
         ClubSupabaseURL: $(CLUB_SUPABASE_URL)
         ClubSupabaseKey: $(CLUB_SUPABASE_KEY)
+        # Bundled brand fonts (App/Resources/Fonts, SIL OFL; licences beside them).
+        UIAppFonts: [Inter-Regular.ttf, Inter-SemiBold.ttf, Inter-Bold.ttf, Anton-Regular.ttf]
         NSFaceIDUsageDescription: Damit du die App mit Face ID entsperren kannst.
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]

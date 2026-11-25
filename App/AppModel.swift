@@ -69,7 +69,7 @@ final class AppModel {
     }
 
     func saveBirthDate(_ date: Date, of me: Me) async throws {
-        let day = date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
+        let day = date.formatted(Date.ISO8601FormatStyle(timeZone: club.flatMap { TimeZone(identifier: $0.timeZone) } ?? .current).year().month().day())
         try await api.updateProfile(of: me.member.id, ProfileBody(birthDate: day))
         try await enter()
     }
